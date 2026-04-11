@@ -39,7 +39,7 @@ func Load() (*Config, error) {
 	viper.AddConfigPath("..")
 
 	// Set defaults
-	viper.SetDefault("SERVER_PORT", "8080")
+	viper.SetDefault("SERVER_PORT", "8076")
 	viper.SetDefault("REDIS_HOST", "localhost")
 	viper.SetDefault("REDIS_PORT", "6379")
 	viper.SetDefault("REDIS_DB", "0")

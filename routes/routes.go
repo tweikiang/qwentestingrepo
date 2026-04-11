@@ -23,7 +23,7 @@ func SetupRoutes(
 	router.HandleFunc("/search", searchHandler.Search).Methods("GET")
 
 	// Health check endpoint (no auth required for health)
-	router.HandleFunc("/health", searchHandler.Health).Methods("GET").Headers("X-Health-Check", "true")
+	router.HandleFunc("/health", searchHandler.Health).Methods("GET")
 
 	// Root endpoint with API info
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

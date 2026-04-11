@@ -4,9 +4,9 @@ services:
   app:
     build: .
     ports:
-      - "8080:8080"
+      - "8076:8076"
     environment:
-      - SERVER_PORT=8080
+      - SERVER_PORT=8076
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - MEILISEARCH_HOST=http://meilisearch:7700
