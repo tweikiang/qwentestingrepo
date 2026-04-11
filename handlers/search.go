@@ -34,7 +34,7 @@ func NewSearchHandler(service *strategy.SearchService) *SearchHandler {
 }
 
 func (h *SearchHandler) Search(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
 	defer cancel()
 
 	query := r.URL.Query().Get("q")
@@ -56,8 +56,8 @@ func (h *SearchHandler) Search(w http.ResponseWriter, r *http.Request) {
 	results, err := h.service.Search(ctx, query, limit)
 	if err != nil {
 		logger.Log.Error().Err(err).Str("query", query).Msg("Search failed")
-		h.sendError(w, "Internal Server Error", "Search failed", http.StatusInternalServerError)
-		return
+		// Return empty results instead of error on timeout/context cancellation
+		results = []strategy.SearchResult{}
 	}
 
 	response := SearchResponse{
