@@ -131,17 +131,15 @@ func (p *ScrapeProvider) parseHTML(html string, query string) []strategy.SearchR
 			continue
 		}
 
-		url := match[1]
+		rawURL := match[1]
 		title := cleanHTML(match[2])
 
-		// Skip internal DDG URLs
-		if strings.Contains(url, "duckduckgo.com") && !strings.Contains(url, "adclick") {
+		// Extract actual URL from DuckDuckGo redirect
+		url := p.extractActualURL(rawURL)
+		
+		// Skip if we couldn't extract a valid URL
+		if url == "" || strings.HasPrefix(url, "//duckduckgo.com") {
 			continue
-		}
-
-		// Clean URL if it's a redirect
-		if strings.HasPrefix(url, "//") {
-			url = "https:" + url
 		}
 
 		description := ""
@@ -160,6 +158,38 @@ func (p *ScrapeProvider) parseHTML(html string, query string) []strategy.SearchR
 	}
 
 	return results
+}
+
+func (p *ScrapeProvider) extractActualURL(rawURL string) string {
+	// Handle DuckDuckGo redirect URLs like //duckduckgo.com/l/?uddg=https%3A%2F%2F...
+	if strings.Contains(rawURL, "/l/?uddg=") {
+		// Parse the URL to extract uddg parameter
+		baseURL := rawURL
+		if strings.HasPrefix(rawURL, "//") {
+			baseURL = "https:" + rawURL
+		}
+		
+		u, err := url.Parse(baseURL)
+		if err != nil {
+			return rawURL
+		}
+		
+		uddg := u.Query().Get("uddg")
+		if uddg != "" {
+			// URL decode the uddg parameter
+			decoded, err := url.QueryUnescape(uddg)
+			if err == nil {
+				return decoded
+			}
+		}
+	}
+	
+	// Handle simple protocol-relative URLs
+	if strings.HasPrefix(rawURL, "//") && !strings.Contains(rawURL, "?") {
+		return "https:" + rawURL
+	}
+	
+	return rawURL
 }
 
 func cleanHTML(s string) string {
